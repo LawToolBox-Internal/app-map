@@ -1,0 +1,661 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #1B365D;
+    --orange: #E87722;
+    --navy-light: #2a4f86;
+    --navy-pale: #e8eef5;
+    --orange-light: #f9e9d9;
+    --azure-blue: #0078d4;
+    --azure-pale: #deecf9;
+    --github-dark: #24292f;
+    --github-pale: #e8ebef;
+    --green: #107c10;
+    --green-pale: #e0f0e0;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --text: var(--color-text-primary);
+    --text2: var(--color-text-secondary);
+    --bg: var(--color-background-primary);
+    --bg2: var(--color-background-secondary);
+    --border: var(--color-border-tertiary);
+  }
+
+  .app-map { font-family: var(--sans); padding: 0; }
+
+  /* Header */
+  .hdr {
+    background: var(--navy);
+    color: #fff;
+    padding: 20px 24px 16px;
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  .hdr-left h1 { font-size: 15px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 4px; }
+  .hdr-left h2 { font-size: 22px; font-weight: 600; color: #fff; }
+  .hdr-left p { font-size: 12px; color: rgba(255,255,255,.55); margin-top: 4px; font-family: var(--mono); }
+  .hdr-badge { background: var(--orange); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; letter-spacing: .03em; margin-top: 4px; white-space: nowrap; }
+
+  /* App selector tabs */
+  .tab-bar {
+    display: flex; gap: 0;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    flex: none; padding: 11px 20px; font-size: 13px; font-weight: 500;
+    font-family: var(--sans); background: none; border: none; border-bottom: 2px solid transparent;
+    cursor: pointer; color: var(--text2); white-space: nowrap; transition: all .15s;
+  }
+  .tab-btn:hover { color: var(--text); background: var(--bg); }
+  .tab-btn.active { color: var(--navy); border-bottom-color: var(--orange); font-weight: 600; background: var(--bg); }
+  .tab-btn .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 7px; vertical-align: middle; }
+
+  /* Panel */
+  .panel { display: none; padding: 0; }
+  .panel.active { display: block; }
+
+  /* App header strip */
+  .app-hdr {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .app-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .app-hdr-text h3 { font-size: 16px; font-weight: 600; }
+  .app-hdr-text p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .app-hdr-links { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+  .link-chip {
+    display: flex; align-items: center; gap: 5px; padding: 5px 10px;
+    border: 0.5px solid var(--border); border-radius: 6px; font-size: 11px; font-weight: 500;
+    text-decoration: none; color: var(--text2); background: var(--bg2); cursor: pointer;
+    font-family: var(--mono); transition: all .15s;
+  }
+  .link-chip:hover { border-color: var(--navy); color: var(--navy); background: var(--navy-pale); }
+  .link-chip .chip-icon { font-size: 13px; }
+
+  /* Two-column body */
+  .panel-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  @media (max-width: 640px) { .panel-body { grid-template-columns: 1fr; } }
+
+  .panel-col { padding: 16px 20px; }
+  .panel-col + .panel-col { border-left: 1px solid var(--border); }
+
+  .section-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text2); margin-bottom: 10px;
+  }
+
+  /* Architecture diagram area */
+  .arch-diagram { margin-bottom: 16px; }
+
+  /* Component cards */
+  .comp-list { display: flex; flex-direction: column; gap: 6px; }
+  .comp-card {
+    border: 0.5px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; cursor: pointer;
+    transition: all .15s; background: var(--bg);
+  }
+  .comp-card:hover { border-color: var(--navy); background: var(--navy-pale); }
+  .comp-card.selected { border-color: var(--navy); border-width: 1px; background: var(--navy-pale); }
+  .comp-card-top { display: flex; align-items: center; gap: 8px; }
+  .comp-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; letter-spacing: .03em; white-space: nowrap; }
+  .comp-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .comp-desc { font-size: 12px; color: var(--text2); margin-top: 4px; line-height: 1.5; display: none; }
+  .comp-card.selected .comp-desc { display: block; }
+  .comp-url { font-size: 11px; font-family: var(--mono); color: var(--navy); margin-top: 4px; word-break: break-all; display: none; }
+  .comp-card.selected .comp-url { display: block; }
+
+  /* Detail panel */
+  .detail-panel {
+    background: var(--bg2); border: 0.5px solid var(--border);
+    border-radius: 8px; padding: 14px; min-height: 180px;
+  }
+  .detail-panel h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .detail-placeholder { color: var(--text2); font-size: 12px; font-style: italic; }
+  .detail-field { font-size: 12px; line-height: 1.6; color: var(--text2); margin-bottom: 6px; }
+  .detail-field strong { color: var(--text); font-weight: 500; }
+  .detail-field code { font-family: var(--mono); font-size: 11px; background: var(--bg); padding: 1px 5px; border-radius: 4px; border: 0.5px solid var(--border); }
+
+  /* Flow diagram SVG wrapper */
+  .flow-wrap { overflow-x: auto; }
+  .flow-wrap svg { display: block; }
+
+  /* Badge color variants */
+  .badge-azure { background: var(--azure-pale); color: #0050a0; }
+  .badge-github { background: var(--github-pale); color: #24292f; }
+  .badge-node { background: var(--green-pale); color: #0a5c0a; }
+  .badge-ext { background: var(--orange-light); color: #8a3e00; }
+  .badge-ms { background: #e5f3ff; color: #00429a; }
+
+  /* Status indicators */
+  .status-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .status-pill { font-size: 11px; padding: 3px 9px; border-radius: 12px; font-weight: 500; }
+  .status-live { background: var(--green-pale); color: #0a5c0a; }
+  .status-active { background: var(--azure-pale); color: #0050a0; }
+
+  /* Legend */
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  /* Future app placeholder */
+  .future-card {
+    border: 1.5px dashed var(--border); border-radius: 10px;
+    padding: 20px; text-align: center; color: var(--text2);
+    background: none; cursor: pointer; transition: all .2s; width: 100%;
+    font-family: var(--sans);
+  }
+  .future-card:hover { border-color: var(--orange); color: var(--orange); background: var(--orange-light); }
+  .future-card .plus { font-size: 22px; display: block; margin-bottom: 4px; }
+  .future-card p { font-size: 13px; font-weight: 500; }
+  .future-card span { font-size: 11px; display: block; margin-top: 2px; }
+
+  /* Footer */
+  .map-footer {
+    border-top: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    background: var(--bg2);
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+  }
+  .map-footer p { font-size: 11px; color: var(--text2); font-family: var(--mono); }
+
+  /* Overview tab styles */
+  .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px 20px; }
+  @media (max-width: 500px) { .overview-grid { grid-template-columns: 1fr; } }
+  .ov-card {
+    border: 0.5px solid var(--border); border-radius: 10px;
+    padding: 14px; background: var(--bg); cursor: pointer; transition: all .15s;
+  }
+  .ov-card:hover { border-color: var(--navy); transform: translateY(-1px); }
+  .ov-card-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 10px; }
+  .ov-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .ov-card p { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .ov-card .ov-meta { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .ov-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; }
+
+  .contacts-section { padding: 0 20px 16px; border-top: 1px solid var(--border); margin-top: 4px; }
+  .contacts-section .section-label { margin-top: 14px; }
+  .contact-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+  .contact-row:last-child { border-bottom: none; }
+  .contact-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--navy-pale); color: var(--navy); font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .contact-name { font-size: 13px; font-weight: 500; }
+  .contact-role { font-size: 11px; color: var(--text2); margin-top: 1px; }
+</style>
+
+<div class="app-map">
+  <!-- Header -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>LawToolBox — Internal IT</h1>
+      <h2>Application Architecture Map</h2>
+      <p>Azure · GitHub · Microsoft 365 · Node.js · WordPress</p>
+    </div>
+    <div>
+      <div class="hdr-badge">INTERNAL DOCUMENT</div>
+      <p style="font-size:11px;color:rgba(255,255,255,.4);margin-top:6px;font-family:var(--mono)">Updated May 2026</p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar" role="tablist">
+    <button class="tab-btn active" onclick="switchTab('overview')" role="tab">
+      <span class="dot" style="background:#1B365D"></span>Overview
+    </button>
+    <button class="tab-btn" onclick="switchTab('chatbot')" role="tab">
+      <span class="dot" style="background:#E87722"></span>LTB AI Chatbot
+    </button>
+    <button class="tab-btn" onclick="switchTab('deploy')" role="tab">
+      <span class="dot" style="background:#0078d4"></span>LTB Deployment Tool
+    </button>
+    <button class="tab-btn" onclick="switchTab('add')" role="tab">
+      <span class="dot" style="background:var(--color-border-secondary)"></span>+ Add App
+    </button>
+  </div>
+
+  <!-- OVERVIEW PANEL -->
+  <div class="panel active" id="panel-overview">
+    <div class="overview-grid">
+      <div class="ov-card" onclick="switchTab('chatbot')">
+        <div class="ov-card-icon" style="background:#fff3e8">🤖</div>
+        <h3>LTB AI Chatbot</h3>
+        <p>Claude-powered support chatbot embedded on lawtoolbox.com. Handles client questions with Salesforce CRM integration and email transcripts.</p>
+        <div class="ov-meta">
+          <span class="ov-tag badge-azure">Azure App Service</span>
+          <span class="ov-tag badge-node">Node.js</span>
+          <span class="ov-tag badge-ext">WordPress</span>
+        </div>
+      </div>
+      <div class="ov-card" onclick="switchTab('deploy')">
+        <div class="ov-card-icon" style="background:#e8f4ff">⚙️</div>
+        <h3>LTB Deployment Tool</h3>
+        <p>PowerShell automation system for provisioning Microsoft 365 tenants at law firm client onboardings. Includes HTML command generator UI.</p>
+        <div class="ov-meta">
+          <span class="ov-tag badge-ms">M365 / PowerShell</span>
+          <span class="ov-tag badge-github">GitHub</span>
+        </div>
+      </div>
+      <div class="ov-card" onclick="switchTab('add')" style="border-style:dashed; background:none; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height:130px;">
+        <div style="font-size:22px;margin-bottom:6px">＋</div>
+        <h3 style="color:var(--text2)">Future Application</h3>
+        <p>Click to document a new app</p>
+      </div>
+    </div>
+
+    <!-- Shared infrastructure -->
+    <div style="padding:0 20px 16px; border-top:1px solid var(--border);">
+      <p class="section-label" style="margin-top:14px">Shared infrastructure &amp; services</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px;">
+        <div style="border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--bg)">
+          <div style="font-size:11px;font-weight:600;color:#0050a0;margin-bottom:3px">AZURE</div>
+          <div style="font-size:12px;font-weight:500">Resource Group</div>
+          <div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">LTB-Web-Chatbot</div>
+        </div>
+        <div style="border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--bg)">
+          <div style="font-size:11px;font-weight:600;color:#24292f;margin-bottom:3px">GITHUB ORG</div>
+          <div style="font-size:12px;font-weight:500">LTBPE</div>
+          <div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">github.com/LTBPE</div>
+        </div>
+        <div style="border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--bg)">
+          <div style="font-size:11px;font-weight:600;color:#0a5c0a;margin-bottom:3px">EMAIL</div>
+          <div style="font-size:12px;font-weight:500">Chat Logs</div>
+          <div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">chatbot-logs@<br>lawtoolbox.com</div>
+        </div>
+        <div style="border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--bg)">
+          <div style="font-size:11px;font-weight:600;color:#8a3e00;margin-bottom:3px">CRM</div>
+          <div style="font-size:12px;font-weight:500">Salesforce</div>
+          <div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">lawtoolbox.my.<br>salesforce.com</div>
+        </div>
+        <div style="border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--bg)">
+          <div style="font-size:11px;font-weight:600;color:#00429a;margin-bottom:3px">M365</div>
+          <div style="font-size:12px;font-weight:500">SMTP Relay</div>
+          <div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">smtp.office365.com<br>Port 587</div>
+        </div>
+        <div style="border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--bg)">
+          <div style="font-size:11px;font-weight:600;color:#0a5c0a;margin-bottom:3px">CI/CD</div>
+          <div style="font-size:12px;font-weight:500">Azure Deployment Center</div>
+          <div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">GitHub → Azure<br>auto-deploy</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key contacts -->
+    <div class="contacts-section">
+      <p class="section-label">Key contacts &amp; approvals</p>
+      <div class="contact-row">
+        <div class="contact-avatar">PE</div>
+        <div><div class="contact-name">Paul Elliott</div><div class="contact-role">IT Director — primary owner of all apps documented here</div></div>
+      </div>
+      <div class="contact-row">
+        <div class="contact-avatar">JG</div>
+        <div><div class="contact-name">Jack Grow</div><div class="contact-role">Executive — approval authority for Azure costs, major changes</div></div>
+      </div>
+      <div class="contact-row">
+        <div class="contact-avatar">CL</div>
+        <div><div class="contact-name">Carol-Lynn (CLG)</div><div class="contact-role">Internal stakeholder — Salesforce / operations</div></div>
+      </div>
+      <div class="contact-row">
+        <div class="contact-avatar">M</div>
+        <div><div class="contact-name">Marisa</div><div class="contact-role">Client onboarding &amp; support — M365 deployment tool end user</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHATBOT PANEL -->
+  <div class="panel" id="panel-chatbot">
+    <div class="app-hdr">
+      <div class="app-icon" style="background:#fff3e8">🤖</div>
+      <div class="app-hdr-text">
+        <h3>LTB AI Support Chatbot</h3>
+        <p>Claude Haiku-powered chat widget embedded on lawtoolbox.com via WordPress / WPCode</p>
+      </div>
+      <div class="app-hdr-links">
+        <span class="link-chip" onclick="openLink('https://github.com/LTBPE/Chatbot')"><span class="chip-icon">⌥</span>LTBPE/Chatbot</span>
+        <span class="link-chip" onclick="openLink('https://ltb-chatbot-g3c7e4a3hxc4fpcz.westcentralus-01.azurewebsites.net')"><span class="chip-icon">⬡</span>Azure App Service</span>
+      </div>
+    </div>
+
+    <!-- Architecture flow SVG -->
+    <div style="padding:14px 20px 6px">
+      <p class="section-label">Data flow</p>
+      <div class="flow-wrap">
+        <svg width="100%" viewBox="0 0 640 160" role="img">
+          <title>LTB AI Chatbot data flow</title>
+          <defs>
+            <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <!-- Boxes -->
+          <!-- Visitor -->
+          <rect x="10" y="58" width="90" height="44" rx="6" fill="#fff3e8" stroke="#E87722" stroke-width="1"/>
+          <text x="55" y="76" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="600" fill="#8a3e00">Visitor</text>
+          <text x="55" y="92" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#8a3e00">lawtoolbox.com</text>
+          <!-- WP Widget -->
+          <rect x="130" y="58" width="90" height="44" rx="6" fill="#e8eef5" stroke="#1B365D" stroke-width="1"/>
+          <text x="175" y="76" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="600" fill="#0d2240">WordPress</text>
+          <text x="175" y="92" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#2a4f86">ltb-chat-widget.js</text>
+          <!-- Backend -->
+          <rect x="250" y="40" width="100" height="80" rx="6" fill="#deecf9" stroke="#0078d4" stroke-width="1"/>
+          <text x="300" y="64" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="600" fill="#0050a0">Node.js</text>
+          <text x="300" y="80" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#0078d4">Backend API</text>
+          <text x="300" y="96" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9" fill="#0078d4">Azure App Service</text>
+          <text x="300" y="110" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9" fill="#0078d4">B1 · Always On</text>
+          <!-- Claude API -->
+          <rect x="380" y="10" width="90" height="44" rx="6" fill="#f0eaff" stroke="#7c5cbf" stroke-width="1"/>
+          <text x="425" y="28" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="600" fill="#4b2f8a">Anthropic</text>
+          <text x="425" y="44" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#7c5cbf">Claude Haiku API</text>
+          <!-- Salesforce -->
+          <rect x="380" y="68" width="90" height="44" rx="6" fill="#f9e9d9" stroke="#E87722" stroke-width="1"/>
+          <text x="425" y="86" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="600" fill="#8a3e00">Salesforce</text>
+          <text x="425" y="102" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#8a3e00">OAuth2 CRM</text>
+          <!-- Email -->
+          <rect x="380" y="126" width="90" height="32" rx="6" fill="#e0f0e0" stroke="#107c10" stroke-width="1"/>
+          <text x="425" y="145" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" font-weight="600" fill="#0a5c0a">M365 SMTP Email</text>
+          <!-- Redis -->
+          <rect x="505" y="58" width="80" height="44" rx="6" fill="#ffeeed" stroke="#cc3333" stroke-width="1"/>
+          <text x="545" y="76" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="600" fill="#991111">Redis</text>
+          <text x="545" y="92" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#cc3333">Session store</text>
+          <!-- Arrows -->
+          <line x1="100" y1="80" x2="128" y2="80" stroke="#1B365D" stroke-width="1" marker-end="url(#arr2)"/>
+          <line x1="220" y1="80" x2="248" y2="80" stroke="#0078d4" stroke-width="1" marker-end="url(#arr2)"/>
+          <line x1="350" y1="65" x2="378" y2="42" stroke="#7c5cbf" stroke-width="1" marker-end="url(#arr2)"/>
+          <line x1="350" y1="82" x2="378" y2="85" stroke="#E87722" stroke-width="1" marker-end="url(#arr2)"/>
+          <line x1="350" y1="100" x2="378" y2="135" stroke="#107c10" stroke-width="1" marker-end="url(#arr2)"/>
+          <line x1="350" y1="80" x2="503" y2="80" stroke="#cc3333" stroke-width="1" marker-end="url(#arr2)"/>
+        </svg>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#fff3e8;border:1px solid #E87722"></div>Client/WordPress</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#deecf9;border:1px solid #0078d4"></div>Azure App Service</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f0eaff;border:1px solid #7c5cbf"></div>Anthropic AI</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#e0f0e0;border:1px solid #107c10"></div>Email / SMTP</div>
+      </div>
+    </div>
+
+    <div class="panel-body">
+      <!-- Left: Components -->
+      <div class="panel-col">
+        <p class="section-label">Components — click for details</p>
+        <div class="comp-list" id="chatbot-comps">
+          <div class="comp-card" onclick="selectComp(this, 'chatbot', 0)">
+            <div class="comp-card-top">
+              <span class="comp-badge badge-ext">WordPress</span>
+              <span class="comp-name">Chat Widget (ltb-chat-widget.js)</span>
+            </div>
+            <div class="comp-desc">Frontend JavaScript widget injected into lawtoolbox.com via the WPCode plugin. Renders the chat UI in LTB brand colors (navy #1B365D / orange #E87722). Sends visitor messages to the backend API and displays responses in real time.</div>
+            <div class="comp-url">Injected via WPCode plugin on lawtoolbox.com</div>
+          </div>
+          <div class="comp-card" onclick="selectComp(this, 'chatbot', 1)">
+            <div class="comp-card-top">
+              <span class="comp-badge badge-azure">Azure</span>
+              <span class="comp-name">Node.js / Express Backend</span>
+            </div>
+            <div class="comp-desc">Core application server. Handles chat sessions, rate limiting, Salesforce lookups, Claude API calls, and email transcript delivery. Deployed on Azure App Service (B1 tier, Always On enabled). Auto-deploys from GitHub on push to main.</div>
+            <div class="comp-url">https://ltb-chatbot-g3c7e4a3hxc4fpcz.westcentralus-01.azurewebsites.net</div>
+          </div>
+          <div class="comp-card" onclick="selectComp(this, 'chatbot', 2)">
+            <div class="comp-card-top">
+              <span class="comp-badge badge-ext">Anthropic</span>
+              <span class="comp-name">Claude Haiku (AI Model)</span>
+            </div>
+            <div class="comp-desc">Anthropic's Claude Haiku model powers all chat responses. The backend calls the Anthropic API with a system prompt tailored to LawToolBox support. API key stored as an Azure App Service environment variable.</div>
+            <div class="comp-url">api.anthropic.com — model: claude-haiku-4-5</div>
+          </div>
+          <div class="comp-card" onclick="selectComp(this, 'chatbot', 3)">
+            <div class="comp-card-top">
+              <span class="comp-badge badge-ext">Salesforce</span>
+              <span class="comp-name">CRM Integration</span>
+            </div>
+            <div class="comp-desc">OAuth 2.0 Client Credentials flow authenticates against Salesforce to look up visitor/client records during chat. Correct login URL is lawtoolbox.my.salesforce.com (not login.salesforce.com). Client ID and secret stored as env vars.</div>
+            <div class="comp-url">lawtoolbox.my.salesforce.com</div>
+          </div>
+          <div class="comp-card" onclick="selectComp(this, 'chatbot', 4)">
+            <div class="comp-card-top">
+              <span class="comp-badge badge-ms">M365</span>
+              <span class="comp-name">Email Transcripts (Nodemailer)</span>
+            </div>
+            <div class="comp-desc">At chat end, Nodemailer sends a full transcript to chatbot-logs@lawtoolbox.com via Microsoft 365 SMTP (smtp.office365.com, port 587, STARTTLS). Credentials stored as env vars. Allows support staff to review all conversations.</div>
+            <div class="comp-url">chatbot-logs@lawtoolbox.com · smtp.office365.com:587</div>
+          </div>
+          <div class="comp-card" onclick="selectComp(this, 'chatbot', 5)">
+            <div class="comp-card-top">
+              <span class="comp-badge" style="background:#ffeeed;color:#991111">Redis</span>
+              <span class="comp-name">Session Management (Redis)</span>
+            </div>
+            <div class="comp-desc">Redis stores chat session state and rate-limiting data. Azure's reverse proxy appends port numbers to req.ip — the rate limiter keyGenerator strips port suffixes via regex to prevent false "too many requests" errors for legitimate visitors.</div>
+            <div class="comp-url">Azure-hosted Redis cache instance</div>
+          </div>
+        </div>
+      </div>
+      <!-- Right: GitHub + env info -->
+      <div class="panel-col">
+        <p class="section-label">GitHub repository</p>
+        <div class="detail-panel" style="margin-bottom:12px">
+          <div class="detail-field"><strong>Repo:</strong> <code>github.com/LTBPE/Chatbot</code></div>
+          <div class="detail-field"><strong>Branch:</strong> <code>main</code></div>
+          <div class="detail-field"><strong>CI/CD:</strong> Azure Deployment Center — push to main triggers automatic deploy to App Service. No manual deploy step needed.</div>
+          <div class="detail-field"><strong>Runtime:</strong> Node.js (LTS). If running locally in WSL, Node must be installed in the Linux environment (symlink <code>/usr/bin/node</code> if needed).</div>
+        </div>
+        <p class="section-label">Environment variables (Azure App Settings)</p>
+        <div class="detail-panel">
+          <div class="detail-field"><code>ANTHROPIC_API_KEY</code> — Claude API auth</div>
+          <div class="detail-field"><code>SF_CLIENT_ID</code> / <code>SF_CLIENT_SECRET</code> — Salesforce OAuth</div>
+          <div class="detail-field"><code>SMTP_USER</code> / <code>SMTP_PASS</code> — M365 email credentials</div>
+          <div class="detail-field"><code>REDIS_URL</code> — Redis connection string</div>
+          <div style="margin-top:8px;padding:8px;background:var(--orange-light);border-radius:6px;font-size:11px;color:#8a3e00;">
+            ⚠ All secrets live only in Azure App Service Configuration → Application Settings. Never commit to GitHub.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEPLOYMENT TOOL PANEL -->
+  <div class="panel" id="panel-deploy">
+    <div class="app-hdr">
+      <div class="app-icon" style="background:#e8f4ff">⚙️</div>
+      <div class="app-hdr-text">
+        <h3>LTB M365 Deployment Tool</h3>
+        <p>PowerShell + HTML automation for provisioning Microsoft 365 tenants at law firm client onboardings</p>
+      </div>
+      <div class="app-hdr-links">
+        <span class="link-chip" onclick="openLink('https://github.com/LTBPE/Chatbot')"><span class="chip-icon">⌥</span>LTBPE (GitHub org)</span>
+      </div>
+    </div>
+
+    <!-- Flow -->
+    <div style="padding:14px 20px 6px">
+      <p class="section-label">Deployment process flow</p>
+      <div class="flow-wrap">
+        <svg width="100%" viewBox="0 0 640 120" role="img">
+          <title>LTB Deployment Tool process flow</title>
+          <defs>
+            <marker id="arr3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <!-- HTML Generator -->
+          <rect x="10" y="38" width="110" height="44" rx="6" fill="#e8eef5" stroke="#1B365D" stroke-width="1"/>
+          <text x="65" y="56" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="600" fill="#0d2240">HTML Command</text>
+          <text x="65" y="70" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#2a4f86">Generator UI</text>
+          <text x="65" y="84" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9" fill="#2a4f86">(browser-based)</text>
+          <!-- PS Script -->
+          <rect x="150" y="28" width="110" height="64" rx="6" fill="#deecf9" stroke="#0078d4" stroke-width="1"/>
+          <text x="205" y="50" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="600" fill="#0050a0">PowerShell</text>
+          <text x="205" y="66" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#0078d4">Deploy Script</text>
+          <text x="205" y="80" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9" fill="#0078d4">PS 5.1 compatible</text>
+          <!-- M365 Admin -->
+          <rect x="290" y="10" width="100" height="44" rx="6" fill="#e5f3ff" stroke="#0050a0" stroke-width="1"/>
+          <text x="340" y="28" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="600" fill="#00429a">M365 Admin</text>
+          <text x="340" y="44" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#0050a0">EXO + Graph</text>
+          <!-- Centralized Add-ins -->
+          <rect x="290" y="66" width="100" height="44" rx="6" fill="#e5f3ff" stroke="#0050a0" stroke-width="1"/>
+          <text x="340" y="84" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="600" fill="#00429a">Centralized</text>
+          <text x="340" y="100" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#0050a0">Add-in Deploy</text>
+          <!-- Client Tenant -->
+          <rect x="420" y="28" width="110" height="64" rx="6" fill="#e0f0e0" stroke="#107c10" stroke-width="1"/>
+          <text x="475" y="50" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="600" fill="#0a5c0a">Client Tenant</text>
+          <text x="475" y="66" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#107c10">Law Firm M365</text>
+          <text x="475" y="80" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9" fill="#107c10">e.g. dunlaplaw.com</text>
+          <!-- GitHub -->
+          <rect x="560" y="38" width="70" height="44" rx="6" fill="#e8ebef" stroke="#24292f" stroke-width="1"/>
+          <text x="595" y="56" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="600" fill="#24292f">GitHub</text>
+          <text x="595" y="70" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#555">LTBPE org</text>
+          <!-- Arrows -->
+          <line x1="120" y1="60" x2="148" y2="60" stroke="#0078d4" stroke-width="1" marker-end="url(#arr3)"/>
+          <line x1="260" y1="46" x2="288" y2="26" stroke="#0050a0" stroke-width="1" marker-end="url(#arr3)"/>
+          <line x1="260" y1="74" x2="288" y2="86" stroke="#0050a0" stroke-width="1" marker-end="url(#arr3)"/>
+          <line x1="390" y1="32" x2="418" y2="50" stroke="#107c10" stroke-width="1" marker-end="url(#arr3)"/>
+          <line x1="390" y1="88" x2="418" y2="70" stroke="#107c10" stroke-width="1" marker-end="url(#arr3)"/>
+          <line x1="150" y1="44" x2="558" y2="44" stroke="#24292f" stroke-width="0.5" stroke-dasharray="4 3" opacity="0.4"/>
+          <text x="580" y="38" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9" fill="#555">source</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="panel-body">
+      <div class="panel-col">
+        <p class="section-label">Components — click for details</p>
+        <div class="comp-list" id="deploy-comps">
+          <div class="comp-card" onclick="selectComp(this, 'deploy', 0)">
+            <div class="comp-card-top">
+              <span class="comp-badge badge-github">GitHub</span>
+              <span class="comp-name">PowerShell Deployment Script</span>
+            </div>
+            <div class="comp-desc">Core automation script that provisions a law firm's Microsoft 365 tenant for LawToolBox. Handles Exchange Online, Graph API, and Centralized Add-in deployment. Written for PowerShell 5.1 compatibility — stays under the 4,096-function module limit. MSAL DLL conflicts between EXO and Graph modules handled via load-order workarounds.</div>
+            <div class="comp-url">github.com/LTBPE — deploy script repo</div>
+          </div>
+          <div class="comp-card" onclick="selectComp(this, 'deploy', 1)">
+            <div class="comp-card-top">
+              <span class="comp-badge badge-ext">Browser</span>
+              <span class="comp-name">HTML Command Generator</span>
+            </div>
+            <div class="comp-desc">Standalone HTML file (runs in any browser, no server needed) that generates the correctly formatted PowerShell command for a given client. Staff enter the firm's domain and tenant details; the tool outputs the exact command to copy-paste into PowerShell. Eliminates manual parameter errors.</div>
+            <div class="comp-url">Static HTML file — opened locally or hosted on internal share</div>
+          </div>
+          <div class="comp-card" onclick="selectComp(this, 'deploy', 2)">
+            <div class="comp-card-top">
+              <span class="comp-badge badge-ms">M365</span>
+              <span class="comp-name">Exchange Online (EXO) Module</span>
+            </div>
+            <div class="comp-desc">PowerShell module used for Exchange Online mailbox and mail-flow configuration steps during client onboarding. Must be imported before the Graph module to avoid MSAL DLL conflicts. Session scope for O365CentralizedAddInDeployment requires a fresh connection per deployment run.</div>
+            <div class="comp-url">Install-Module ExchangeOnlineManagement</div>
+          </div>
+          <div class="comp-card" onclick="selectComp(this, 'deploy', 3)">
+            <div class="comp-card-top">
+              <span class="comp-badge badge-ms">M365</span>
+              <span class="comp-name">Microsoft Graph PowerShell Module</span>
+            </div>
+            <div class="comp-desc">Used for user, group, and application management in the client's M365 tenant. Import after EXO to avoid DLL conflicts. Handles add-in deployment via Centralized Deployment when O365CentralizedAddInDeployment scope is needed.</div>
+            <div class="comp-url">Install-Module Microsoft.Graph</div>
+          </div>
+          <div class="comp-card" onclick="selectComp(this, 'deploy', 4)">
+            <div class="comp-card-top">
+              <span class="comp-badge badge-ext">Reference</span>
+              <span class="comp-name">Tested Client Deployments</span>
+            </div>
+            <div class="comp-desc">Script has been validated against dunlaplaw.com and kurtzriley.com tenants. Use these as reference configurations when troubleshooting a new deployment. Domain format passed to script determines tenant routing.</div>
+            <div class="comp-url">dunlaplaw.com · kurtzriley.com (reference tenants)</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-col">
+        <p class="section-label">GitHub repository</p>
+        <div class="detail-panel" style="margin-bottom:12px">
+          <div class="detail-field"><strong>Org:</strong> <code>github.com/LTBPE</code></div>
+          <div class="detail-field"><strong>Contents:</strong> PowerShell deploy script + HTML command generator. Both versioned together.</div>
+          <div class="detail-field"><strong>No CI/CD:</strong> This tool runs locally on an admin workstation — not deployed to a server. Operator must have the required PS modules installed.</div>
+        </div>
+        <p class="section-label">Prerequisites to run</p>
+        <div class="detail-panel">
+          <div class="detail-field"><strong>PowerShell:</strong> Version 5.1 (Windows). Do not run in PS 7+ — module compatibility issues.</div>
+          <div class="detail-field"><strong>Modules:</strong> <code>ExchangeOnlineManagement</code>, <code>Microsoft.Graph</code> — import EXO first.</div>
+          <div class="detail-field"><strong>Permissions:</strong> Global Admin or delegated admin rights on the target M365 tenant.</div>
+          <div class="detail-field"><strong>Credentials:</strong> Use an LTB admin account with partner delegated access, or client-provided temporary admin credentials.</div>
+          <div style="margin-top:8px;padding:8px;background:var(--azure-pale);border-radius:6px;font-size:11px;color:#0050a0;">
+            ℹ If O365CentralizedAddInDeployment session is lost, disconnect all PS sessions and reconnect EXO before retrying.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD APP PANEL -->
+  <div class="panel" id="panel-add">
+    <div style="padding:32px 24px;text-align:center">
+      <div style="font-size:32px;margin-bottom:12px">📋</div>
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:6px">Document a new application</h3>
+      <p style="font-size:13px;color:var(--text2);max-width:400px;margin:0 auto 20px">Use this checklist as a template when adding the next app to this map. Capture each item before requesting a new tab be added here.</p>
+      <div style="text-align:left;max-width:480px;margin:0 auto;border:0.5px solid var(--border);border-radius:10px;padding:16px;background:var(--bg)">
+        <p style="font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">New App Documentation Checklist</p>
+        <div id="checklist"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="map-footer">
+    <p>LawToolBox, Inc. · Internal IT · paul.elliott@lawtoolbox.com</p>
+    <p>Resource group: LTB-Web-Chatbot · Region: West Central US</p>
+  </div>
+</div>
+
+<script>
+const tabs = ['overview','chatbot','deploy','add'];
+
+function switchTab(name) {
+  tabs.forEach(t => {
+    document.getElementById('panel-'+t).classList.toggle('active', t===name);
+  });
+  document.querySelectorAll('.tab-btn').forEach((btn,i) => {
+    btn.classList.toggle('active', tabs[i]===name);
+  });
+}
+
+function selectComp(el, app, idx) {
+  const list = document.getElementById(app+'-comps');
+  list.querySelectorAll('.comp-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function openLink(url) {
+  window.open(url, '_blank');
+}
+
+const checklistItems = [
+  "App name and one-sentence purpose",
+  "Azure resource group and service tier",
+  "GitHub repo URL and branch strategy",
+  "Architecture / data flow diagram (add to this doc)",
+  "All external services and APIs used",
+  "All environment variables / secrets and where they're stored",
+  "CI/CD pipeline: how code gets from GitHub → production",
+  "Prerequisites to run or maintain (modules, permissions, tools)",
+  "Key contacts: owner, approver, end users",
+  "Known issues / gotchas documented",
+  "Tested against which environments or clients",
+];
+
+const cl = document.getElementById('checklist');
+checklistItems.forEach(item => {
+  const row = document.createElement('label');
+  row.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;font-size:12px;color:var(--color-text-primary);';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.style.cssText = 'margin-top:2px;flex-shrink:0;accent-color:var(--navy,#1B365D)';
+  cb.onchange = function() {
+    row.style.color = this.checked ? 'var(--color-text-secondary)' : 'var(--color-text-primary)';
+    row.style.textDecoration = this.checked ? 'line-through' : 'none';
+  };
+  row.appendChild(cb);
+  row.appendChild(document.createTextNode(item));
+  cl.appendChild(row);
+});
+</script>
